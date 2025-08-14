@@ -2,39 +2,42 @@ name: Build Windows Portable
 
 on:
   push:
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
   build-windows:
     runs-on: windows-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Install CMake
-        uses: lukka/get-cmake@v3
+        uses: lukka/get-cmake@v1
 
-      - name: Install Qt 6
+      - name: Install Qt 6 (MSVC 2022)
         uses: jurplel/install-qt-action@v3
         with:
           version: '6.6.3'
           host: 'windows'
           target: 'desktop'
-          arch: 'win64_msvc2019_64'
-          modules: 'qt5compat qtimageformats qtmultimedia'
+          arch: 'win64_msvc2022_64'
+          modules: 'qtmultimedia qtimageformats'
           cache: true
 
-      - name: Configure
-        run: cmake -B build -S . -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="%Qt6_DIR%/.."
+      - name: Configure (VS 2022 x64)
+        run: cmake -B build -S . -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="$Env:Qt6_DIR"
 
-      - name: Build
-        run: cmake --build build --config Release -j
+      - name: Build (Release)
+        run: cmake --build build --config Release --parallel
 
       - name: Deploy Qt (windeployqt)
         shell: pwsh
         run: |
           $exe = "build/Release/quickcut.exe"
-          & "${env:IQTA_TOOLS}/Qt6/bin/windeployqt.exe" --release --compiler-runtime $exe
+          # install-qt-action 会把 Qt 的 bin 放进 PATH，直接调用 windeployqt 即可
+          windeployqt --release --compiler-runtime $exe
 
       - name: Download FFmpeg
         shell: pwsh
@@ -46,9 +49,8 @@ jobs:
           Copy-Item "$($ff.FullName)\bin\ffmpeg.exe" build\Release -Force
           Copy-Item "$($ff.FullName)\bin\ffprobe.exe" build\Release -Force
 
-      - name: Package Portable Zip
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: QuickCut_Windows_Portable
-          path: |
-            build/Release/*
+          path: build/Release/*
