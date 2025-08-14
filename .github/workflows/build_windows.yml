@@ -13,8 +13,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install CMake
-        uses: lukka/get-cmake@v1
+      # 移除了 get-cmake 步骤，runner 自带 CMake
 
       - name: Install Qt 6 (MSVC 2022)
         uses: jurplel/install-qt-action@v3
@@ -36,7 +35,6 @@ jobs:
         shell: pwsh
         run: |
           $exe = "build/Release/quickcut.exe"
-          # install-qt-action 会把 Qt 的 bin 放进 PATH，直接调用 windeployqt 即可
           windeployqt --release --compiler-runtime $exe
 
       - name: Download FFmpeg
