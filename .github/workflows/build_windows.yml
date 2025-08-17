@@ -13,17 +13,26 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 移除了 get-cmake 步骤，runner 自带 CMake
+      - name: Setup Python (for aqt)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
       - name: Install Qt 6 (MSVC 2022)
         uses: jurplel/install-qt-action@v3
         with:
-          version: '6.7.2'
+          version: '6.8.2'               # ← 改成 6.8.2（有 msvc2022_64）
           host: 'windows'
           target: 'desktop'
           arch: 'win64_msvc2022_64'
           modules: 'qtmultimedia qtimageformats'
-          cache: true
+          cache: false
+
+      - name: Verify Qt path
+        shell: pwsh
+        run: |
+          echo "Qt6_DIR=$Env:Qt6_DIR"
+          dir "$Env:Qt6_DIR"
 
       - name: Configure (VS 2022 x64)
         run: cmake -B build -S . -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="$Env:Qt6_DIR"
