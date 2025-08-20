@@ -1,7 +1,11 @@
-#include <iostream>
+#include <QApplication>
+#include <QMainWindow>
 
-int main() {
-    std::cout << "Hello from QuickCut!" << std::endl;
-    return 0;
+int main(int argc, char *argv[]) {
+    QApplication app(argc, argv);
+    QMainWindow window;
+    window.setWindowTitle("QuickCut Demo");
+    window.resize(800, 600);
+    window.show();
+    return app.exec();
 }
-
