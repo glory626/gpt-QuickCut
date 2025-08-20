@@ -47,14 +47,10 @@ jobs:
           windeployqt --release --compiler-runtime $exe
 
       - name: Download FFmpeg
-        shell: pwsh
         run: |
-          $url = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-essentials.zip"
+          $url = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip"
           Invoke-WebRequest -Uri $url -OutFile ffmpeg.zip
-          Expand-Archive ffmpeg.zip -DestinationPath .
-          $ff = Get-ChildItem -Directory -Filter "ffmpeg*" | Select-Object -First 1
-          Copy-Item "$($ff.FullName)\bin\ffmpeg.exe" build\Release -Force
-          Copy-Item "$($ff.FullName)\bin\ffprobe.exe" build\Release -Force
+          Expand-Archive ffmpeg.zip -DestinationPath $env:GITHUB_WORKSPACE/ffmpeg
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
